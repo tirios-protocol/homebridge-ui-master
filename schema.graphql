@@ -1,0 +1,81 @@
+enum RequestType {
+  Simple
+  BuyBack
+  PropertyVault
+  FixFailedMsg
+}
+
+type RequiredSignature @entity {
+  id: ID!
+  amount: BigInt!
+}
+
+type CollectedSignatureEntity @entity {
+  id: ID!
+  messageHash: Bytes!
+  messageData: Bytes!
+  messageId: Bytes!
+  signatures: [Bytes!]!
+  ready: Boolean!
+  txHash: Bytes!
+  type: RequestType!
+  blockNumber: BigInt!
+}
+
+type AdminFix @entity(immutable: true) {
+  id: ID!
+  from: Bytes!
+  txHash: Bytes!
+  messageId: Bytes!
+  block: BigInt!
+  timestamp: BigInt!
+}
+
+type RequestBridgeToken @entity {
+  id: ID!
+  from: Bytes!
+  recipient: Bytes!
+  txHash: Bytes!
+  messageId: Bytes!
+  messageHash: Bytes!
+  type: RequestType!
+  tokens: [Token!]!
+  tokensOrder: [Bytes!]!
+  amounts: [BigInt!]!
+  block: BigInt!
+  timestamp: BigInt!
+  requiredSignature: BigInt!
+}
+
+type RequestFixFail @entity(immutable: true) {
+  id: ID!
+  txHash: Bytes!
+  messageIdToFix: Bytes!
+  messageId: Bytes!
+  messageHash: Bytes!
+  type: RequestType!
+  block: BigInt!
+  timestamp: BigInt!
+  requiredSignature: BigInt!
+}
+
+type Execution @entity(immutable: true) {
+  id: ID!
+  messageId: Bytes!
+  status: Boolean!
+  block: BigInt!
+  timestamp: BigInt!
+  txHash: Bytes!
+}
+
+type Token @entity {
+  id: ID! # localAddress
+  localAddress: Bytes!
+  remoteAddress: Bytes!
+  bridgedVolume: BigInt!
+}
+
+type RemoteToken @entity {
+  id: ID! # remoteAddress
+  localAddress: Bytes!
+}

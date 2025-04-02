@@ -1,0 +1,93 @@
+specVersion: 0.0.4
+description: Subgraph that indexes the homebridge transfers
+repository: https://github.com/raid-guild/xdai-homebridge
+schema:
+  file: ./schema.graphql
+dataSources:
+  - kind: ethereum/contract
+    name: AMB
+    network: {{network}}
+    source:
+      abi: AMB
+      address: '{{amb}}'
+      startBlock: {{startBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      abis:
+        - name: AMB
+          file: ./src/abis/amb.json
+      entities:
+        - RequestBridgeToken
+        - RequestFixFail
+        - Execution
+        - Token
+        - RemoteToken
+        - RequiredSignature
+        - CollectedSignatureEntity
+      eventHandlers:
+        - event: CollectedSignatures(address,bytes32,uint256)
+          handler: handleCollectedSignatures
+        - event: SignedForUserRequest(indexed address,bytes32)
+          handler: handleSignedForUserRequest
+        - event: UserRequestForSignature(indexed bytes32,bytes)
+          handler: handleUserRequestForSignature
+        - event: UserRequestForAffirmation(indexed bytes32,bytes)
+          handler: handleUserRequestForAffirmation
+        - event: RelayedMessage(indexed address,indexed address,indexed bytes32,bool)
+          handler: handleRelayedMessage
+        - event: AffirmationCompleted(indexed address,indexed address,indexed bytes32,bool)
+          handler: handleAffirmationCompleted
+      file: ./src/mappings/amb.ts
+      language: wasm/assemblyscript
+  - kind: ethereum/contract
+    name: RealtMediatorAMB
+    network: {{network}}
+    source:
+      abi: RealtMediatorAMB
+      address: '{{mediator}}'
+      startBlock: {{mediatorStartBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      abis:
+        - name: RealtMediatorAMB
+          file: ./src/abis/mediator.json
+      entities:
+        - AdminFix
+        - Token
+        - RemoteToken
+        - RequestBridgeToken
+      eventHandlers:
+        - event: TokenSet(address,address)
+          handler: handleTokenSet
+        - event: TokenListSet(address[],address[])
+          handler: handleTokenListSet
+        - event: BuyBackInitiated(bytes32)
+          handler: handleBuyBack
+        - event: ManualFix(bytes32)
+          handler: handleManualFix
+      file: ./src/mappings/mediator.ts
+      language: wasm/assemblyscript
+  - kind: ethereum/contract
+    name: BridgeValidators
+    network: {{network}}
+    source:
+      abi: BridgeValidators
+      address: '{{validator}}'
+      startBlock: {{validatorStartBlock}}
+    mapping:
+      kind: ethereum/events
+      apiVersion: 0.0.7
+      abis:
+        - name: BridgeValidators
+          file: ./src/abis/bridgeValidators.json
+      entities:
+        - RequiredSignature
+      eventHandlers:
+        - event: RequiredSignaturesChanged(uint256)
+          handler: handleRequiredSignaturesChanged
+      file: ./src/mappings/bridgeValidator.ts
+      language: wasm/assemblyscript
+
+
